@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="de" id="html-root">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">Carman &ndash; Dein smarter Fahrzeugmanager</title>
+  <meta name="description" id="page-desc" content="Carman hilft dir, Wartungen, Kosten und Tankfuellungen fuer dein Fahrzeug einfach zu verwalten.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="author" content="WAMOCON GmbH">
+  <link rel="icon" href="app-icon-light.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Carman">
+  <meta property="og:title" content="Carman &ndash; Dein smarter Fahrzeugmanager">
+  <meta property="og:description" content="Wartungen, Kosten und Tankfuellungen einfach im Blick behalten.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    :root {
+      --bg: #08090e;
+      --surface: #0f1119;
+      --border: rgba(255,255,255,.08);
+      --border-h: rgba(255,255,255,.15);
+      --accent: #2563eb;
+      --accent-h: #1d4ed8;
+      --accent-s: rgba(37,99,235,.1);
+      --accent-g: rgba(37,99,235,.28);
+      --text: #f0f0f5;
+      --muted: #8888a0;
+      --faint: #48485e;
+      --sans: 'Inter', system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-size: 16px; scrollbar-width: none; scroll-behavior: smooth; }
+    html::-webkit-scrollbar { display: none; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+    /* ── Nav ── */
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 64px; display: flex; align-items: center; transition: background .4s, box-shadow .4s; }
+    .nav.scrolled { background: rgba(8,9,14,.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(37,99,235,.18); box-shadow: 0 2px 24px rgba(0,0,0,.35); }
+    .nav-inner { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-text { font-size: 1.35rem; font-weight: 900; letter-spacing: -0.5px; color: #60a5fa; }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-link { color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 500; transition: color .2s; }
+    .nav-link:hover { color: var(--text); }
+    .lang-pill { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 99px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); font-size: .8rem; font-weight: 700; }
+    .lang-pill a { color: var(--muted); text-decoration: none; transition: color .2s; cursor: pointer; }
+    .lang-pill a.on { color: #60a5fa; }
+    .lang-pill a:hover { color: var(--text); }
+
+    /* ── Hamburger ── */
+    .burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 6px; background: none; border: none; }
+    .burger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all .3s; }
+    @media (max-width: 768px) { .burger { display: flex; } .nav-links { display: none !important; } }
+
+    /* ── Mobile menu ── */
+    #mm { position: fixed; inset: 0; z-index: 100; background: rgba(8,9,14,.97); backdrop-filter: blur(24px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; opacity: 0; pointer-events: none; transition: opacity .3s; }
+    #mm.on { opacity: 1; pointer-events: all; }
+    #mm a { color: var(--text); text-decoration: none; font-size: 1.5rem; font-weight: 700; transition: color .2s; }
+    #mm a:hover { color: #60a5fa; }
+
+    /* ── Buttons ── */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 12px; text-decoration: none; font-weight: 700; transition: background .2s, box-shadow .2s, transform .15s; }
+    .btn-p { background: var(--accent); color: #fff; box-shadow: 0 4px 24px var(--accent-g); padding: 14px 32px; font-size: .95rem; }
+    .btn-p:hover { background: var(--accent-h); box-shadow: 0 6px 32px rgba(37,99,235,.45); transform: translateY(-1px); }
+    .btn-o { background: transparent; color: var(--text); border: 1px solid var(--border-h); padding: 14px 32px; font-size: .95rem; }
+    .btn-o:hover { border-color: rgba(37,99,235,.45); background: rgba(37,99,235,.07); }
+    .btn-sm { padding: 9px 20px; font-size: .85rem; }
+
+    /* ── Gradient text ── */
+    .grad { background: linear-gradient(135deg, #93c5fd, #2563eb); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+    /* ── Reveal ── */
+    .rev { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+    .rev.in { opacity: 1; transform: none; }
+
+    /* ── Feature card ── */
+    .fc { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; position: relative; overflow: hidden; transition: border-color .5s, transform .5s, box-shadow .5s; }
+    .fc:hover { border-color: rgba(37,99,235,.35); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(37,99,235,.14); }
+    .fc::after { content: ''; position: absolute; top: 0; left: -80%; width: 55%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.05), transparent); transform: skewX(-18deg); transition: left .7s ease; pointer-events: none; }
+    .fc:hover::after { left: 130%; }
+    .icon-b { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: var(--accent-s); border: 1px solid rgba(37,99,235,.22); margin-bottom: 16px; font-size: 1.4rem; }
+
+    /* ── Orbs ── */
+    .orb { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(120px); opacity: .1; z-index: 0; }
+    .o1 { width: 600px; height: 600px; background: #2563eb; top: -200px; right: -100px; }
+    .o2 { width: 500px; height: 500px; background: #1e40af; bottom: 10%; left: -150px; }
+
+    /* ── Stats ── */
+    .snum { font-size: clamp(2.5rem,5vw,4rem); font-weight: 900; line-height: 1; letter-spacing: -0.04em; color: #60a5fa; }
+
+    /* ── FAQ ── */
+    details summary::-webkit-details-marker { display: none; }
+    details summary { display: flex; justify-content: space-between; align-items: center; cursor: pointer; list-style: none; }
+    details summary::after { content: '+'; font-weight: 700; color: var(--muted); font-size: 1.1rem; }
+    details[open] summary::after { content: '\2212'; }
+
+    /* ── Footer ── */
+    footer { background: #05060a; border-top: 1px solid var(--border); }
+    .flink { color: var(--muted); text-decoration: none; font-size: .9rem; transition: color .2s; }
+    .flink:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <div aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div></div>
+
+  <!-- ═══ NAV ═══ -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a class="logo" href="#">
+        <img src="app-icon-light.svg" alt="Carman" width="30" height="30">
+        <span class="logo-text">carman</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="#features" data-i18n="nav_features">Features</a>
+        <a class="nav-link" href="#how-it-works" data-i18n="nav_how">So funktioniert&#39;s</a>
+        <a class="nav-link" href="#faq" data-i18n="nav_faq">FAQ</a>
+        <a class="btn btn-p btn-sm" href="https://app.carman.io" target="_blank" rel="noopener" data-i18n="nav_app">Zur App</a>
+        <div class="lang-pill">
+          <a id="ld" class="on" onclick="setLang('de');return false;" href="#">DE</a>
+          <span style="color:var(--faint)">|</span>
+          <a id="le" onclick="setLang('en');return false;" href="#">EN</a>
+        </div>
+      </div>
+      <button class="burger" id="burgerBtn" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══ MOBILE MENU ═══ -->
+  <div id="mm">
+    <button onclick="closeMM()" style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;width:44px;height:44px;border-radius:50%;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
+    <a href="#features" onclick="closeMM()" data-i18n="nav_features">Features</a>
+    <a href="#how-it-works" onclick="closeMM()" data-i18n="nav_how">So funktioniert&#39;s</a>
+    <a href="#faq" onclick="closeMM()" data-i18n="nav_faq">FAQ</a>
+    <a class="btn btn-p" href="https://app.carman.io" target="_blank" rel="noopener" data-i18n="nav_app">Zur App</a>
+    <div class="lang-pill" style="margin-top:.5rem;">
+      <a id="ldm" class="on" onclick="setLang('de');closeMM();return false;" href="#">DE</a>
+      <span style="color:var(--faint)">|</span>
+      <a id="lem" onclick="setLang('en');closeMM();return false;" href="#">EN</a>
+    </div>
+  </div>
+
+  <!-- ═══ HERO ═══ -->
+  <section id="hero" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 20px 80px;position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 55% 40%,rgba(37,99,235,.08) 0%,transparent 65%);z-index:0;"></div>
+    <div style="position:absolute;inset:0;opacity:.04;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 60% 55% at 50% 50%,black 0%,transparent 70%);z-index:0;"></div>
+    <div style="position:relative;z-index:1;text-align:center;max-width:900px;margin:0 auto;">
+      <div class="rev" style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.3);border-radius:99px;margin-bottom:28px;">
+        <img src="app-icon-light.svg" alt="" width="16" height="16">
+        <span style="font-size:.78rem;font-weight:700;color:#93c5fd;letter-spacing:.08em;text-transform:uppercase;" data-i18n="hero_badge">Smarter Fahrzeugmanager</span>
+      </div>
+      <h1 class="rev" style="font-size:clamp(2.8rem,7vw,5.5rem);font-weight:900;line-height:1.06;letter-spacing:-0.04em;margin:0 0 24px;">
+        <span data-i18n="hero_t1">Dein Auto.</span><br>
+        <span class="grad" data-i18n="hero_t2">Perfekt im Griff.</span>
+      </h1>
+      <p class="rev" style="font-size:1.15rem;color:var(--muted);max-width:620px;margin:0 auto 40px;line-height:1.7;" data-i18n="hero_desc">
+        Carman hilft dir, Wartungen, Kraftstoff, Kosten und Erinnerungen f&uuml;r all deine Fahrzeuge einfach und &uuml;bersichtlich zu verwalten.
+      </p>
+      <div class="rev" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+        <a class="btn btn-p" href="https://app.carman.io" target="_blank" rel="noopener" data-i18n="hero_cta1">App starten &rarr;</a>
+        <a class="btn btn-o" href="#features" data-i18n="hero_cta2">Mehr erfahren</a>
+      </div>
+      <p class="rev" style="font-size:.85rem;color:var(--faint);margin-top:20px;" data-i18n="hero_note">Kostenlos starten &middot; Keine Registrierung erforderlich</p>
+    </div>
+  </section>
+
+  <!-- ═══ FEATURES ═══ -->
+  <section id="features" style="padding:80px 0;background:var(--surface);">
+    <div style="max-width:1100px;margin:0 auto;padding:0 20px;">
+      <div class="rev" style="text-align:center;margin-bottom:56px;">
+        <h2 style="font-size:clamp(2rem,4vw,3.2rem);font-weight:800;letter-spacing:-0.03em;margin:0 0 14px;" data-i18n="feat_title">Alles was dein Auto braucht</h2>
+        <p style="font-size:1.05rem;color:var(--muted);max-width:560px;margin:0 auto;" data-i18n="feat_sub">Vollst&auml;ndige &Uuml;bersicht &uuml;ber Wartung, Kosten und Verbrauch &ndash; alles an einem Ort.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+        <div class="fc rev">
+          <div class="icon-b">&#x1F527;</div>
+          <h3 style="font-weight:700;font-size:1.1rem;margin:0 0 8px;" data-i18n="f1t">Wartungsplanung</h3>
+          <p style="color:var(--muted);font-size:.92rem;line-height:1.6;margin:0;" data-i18n="f1d">&Ouml;lwechsel, T&Uuml;V, Reifenwechsel und alle weiteren Wartungsintervalle immer im Blick.</p>
+        </div>
+        <div class="fc rev">
+          <div class="icon-b">&#x26FD;</div>
+          <h3 style="font-weight:700;font-size:1.1rem;margin:0 0 8px;" data-i18n="f2t">Tankbuch</h3>
+          <p style="color:var(--muted);font-size:.92rem;line-height:1.6;margin:0;" data-i18n="f2d">Protokolliere Tankf&uuml;llungen und analysiere deinen Kraftstoffverbrauch &uuml;ber Zeit.</p>
+        </div>
+        <div class="fc rev">
+          <div class="icon-b">&#x1F4B6;</div>
+          <h3 style="font-weight:700;font-size:1.1rem;margin:0 0 8px;" data-i18n="f3t">Kostentracking</h3>
+          <p style="color:var(--muted);font-size:.92rem;line-height:1.6;margin:0;" data-i18n="f3d">Alle Fahrzeugkosten &ndash; Reparaturen, Versicherung, Steuern &ndash; auf einen Blick erfassen.</p>
+        </div>
+        <div class="fc rev">
+          <div class="icon-b">&#x1F514;</div>
+          <h3 style="font-weight:700;font-size:1.1rem;margin:0 0 8px;" data-i18n="f4t">Erinnerungen</h3>
+          <p style="color:var(--muted);font-size:.92rem;line-height:1.6;margin:0;" data-i18n="f4d">Automatische Erinnerungen f&uuml;r anstehende Wartungen &ndash; damit nichts verpasst wird.</p>
+        </div>
+        <div class="fc rev">
+          <div class="icon-b">&#x1F697;</div>
+          <h3 style="font-weight:700;font-size:1.1rem;margin:0 0 8px;" data-i18n="f5t">Mehrere Fahrzeuge</h3>
+          <p style="color:var(--muted);font-size:.92rem;line-height:1.6;margin:0;" data-i18n="f5d">Autos, Motorr&auml;der oder Nutzfahrzeuge &ndash; alles in einer einzigen App verwalten.</p>
+        </div>
+        <div class="fc rev">
+          <div class="icon-b">&#x1F4CA;</div>
+          <h3 style="font-weight:700;font-size:1.1rem;margin:0 0 8px;" data-i18n="f6t">Auswertungen</h3>
+          <p style="color:var(--muted);font-size:.92rem;line-height:1.6;margin:0;" data-i18n="f6d">&Uuml;bersichtliche Statistiken zu Kosten, Verbrauch und Fahrleistung.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ STATS ═══ -->
+  <section style="padding:80px 0;background:var(--bg);">
+    <div style="max-width:1100px;margin:0 auto;padding:0 20px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border:1px solid var(--border);border-radius:20px;overflow:hidden;">
+        <div class="rev" style="text-align:center;padding:48px 24px;background:var(--surface);">
+          <div class="snum">50k+</div>
+          <div style="font-size:.95rem;font-weight:600;color:var(--muted);margin-top:10px;" data-i18n="s1">Aktive Nutzer</div>
+        </div>
+        <div class="rev" style="text-align:center;padding:48px 24px;background:var(--surface);border-left:1px solid var(--border);border-right:1px solid var(--border);">
+          <div class="snum">120k+</div>
+          <div style="font-size:.95rem;font-weight:600;color:var(--muted);margin-top:10px;" data-i18n="s2">Verwaltete Fahrzeuge</div>
+        </div>
+        <div class="rev" style="text-align:center;padding:48px 24px;background:var(--surface);">
+          <div class="snum">4.8&#9733;</div>
+          <div style="font-size:.95rem;font-weight:600;color:var(--muted);margin-top:10px;" data-i18n="s3">Durchschnittsbewertung</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ HOW IT WORKS ═══ -->
+  <section id="how-it-works" style="padding:80px 0;background:var(--surface);">
+    <div style="max-width:1100px;margin:0 auto;padding:0 20px;">
+      <div class="rev" style="text-align:center;margin-bottom:56px;">
+        <h2 style="font-size:clamp(2rem,4vw,3.2rem);font-weight:800;letter-spacing:-0.03em;margin:0 0 14px;" data-i18n="how_title">In 3 Schritten startklar</h2>
+        <p style="font-size:1.05rem;color:var(--muted);max-width:500px;margin:0 auto;" data-i18n="how_sub">Schnell einrichten und sofort loslegen.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;">
+        <div class="rev" style="text-align:center;padding:36px 24px;">
+          <div style="width:60px;height:60px;border-radius:50%;background:var(--accent-s);border:2px solid rgba(37,99,235,.3);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.4rem;color:#60a5fa;margin:0 auto 20px;">1</div>
+          <h3 style="font-weight:700;font-size:1.1rem;margin:0 0 10px;" data-i18n="s1t">Fahrzeug anlegen</h3>
+          <p style="color:var(--muted);font-size:.92rem;line-height:1.6;margin:0;" data-i18n="s1d">Marke, Modell und Baujahr hinzuf&uuml;gen &ndash; fertig in unter einer Minute.</p>
+        </div>
+        <div class="rev" style="text-align:center;padding:36px 24px;">
+          <div style="width:60px;height:60px;border-radius:50%;background:var(--accent-s);border:2px solid rgba(37,99,235,.3);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.4rem;color:#60a5fa;margin:0 auto 20px;">2</div>
+          <h3 style="font-weight:700;font-size:1.1rem;margin:0 0 10px;" data-i18n="s2t">Daten erfassen</h3>
+          <p style="color:var(--muted);font-size:.92rem;line-height:1.6;margin:0;" data-i18n="s2d">Tankf&uuml;llungen, Wartungen und Kosten schnell und unkompliziert eintragen.</p>
+        </div>
+        <div class="rev" style="text-align:center;padding:36px 24px;">
+          <div style="width:60px;height:60px;border-radius:50%;background:var(--accent-s);border:2px solid rgba(37,99,235,.3);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.4rem;color:#60a5fa;margin:0 auto 20px;">3</div>
+          <h3 style="font-weight:700;font-size:1.1rem;margin:0 0 10px;" data-i18n="s3t">&Uuml;berblick behalten</h3>
+          <p style="color:var(--muted);font-size:.92rem;line-height:1.6;margin:0;" data-i18n="s3d">Dashboard, Statistiken und Erinnerungen zeigen alles Wichtige auf einen Blick.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FAQ ═══ -->
+  <section id="faq" style="padding:80px 0;background:var(--bg);">
+    <div style="max-width:760px;margin:0 auto;padding:0 20px;">
+      <div class="rev" style="text-align:center;margin-bottom:48px;">
+        <h2 style="font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.03em;margin:0 0 12px;" data-i18n="faq_title">H&auml;ufige Fragen</h2>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <details class="rev" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;">
+          <summary style="font-weight:600;" data-i18n="fq1">Ist Carman kostenlos?</summary>
+          <p style="color:var(--muted);font-size:.93rem;margin:12px 0 0;line-height:1.6;" data-i18n="fa1">Ja, der Basiszugang ist kostenlos. Premium-Funktionen sind optional gegen eine geringe Geb&uuml;hr verf&uuml;gbar.</p>
+        </details>
+        <details class="rev" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;">
+          <summary style="font-weight:600;" data-i18n="fq2">Wo werden meine Daten gespeichert?</summary>
+          <p style="color:var(--muted);font-size:.93rem;margin:12px 0 0;line-height:1.6;" data-i18n="fa2">Deine Daten werden sicher in der Cloud gespeichert und sind von &uuml;berall abrufbar. Datenschutz hat oberste Priorit&auml;t.</p>
+        </details>
+        <details class="rev" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;">
+          <summary style="font-weight:600;" data-i18n="fq3">Wie viele Fahrzeuge kann ich hinzuf&uuml;gen?</summary>
+          <p style="color:var(--muted);font-size:.93rem;margin:12px 0 0;line-height:1.6;" data-i18n="fa3">Im kostenlosen Plan bis zu 2 Fahrzeuge. Mit einem Premium-Plan unbegrenzt viele Fahrzeuge m&ouml;glich.</p>
+        </details>
+        <details class="rev" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;">
+          <summary style="font-weight:600;" data-i18n="fq4">Gibt es eine mobile App?</summary>
+          <p style="color:var(--muted);font-size:.93rem;margin:12px 0 0;line-height:1.6;" data-i18n="fa4">Carman ist als Progressive Web App (PWA) verf&uuml;gbar und kann auf iOS und Android als App installiert werden.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA ═══ -->
+  <section style="padding:100px 20px;background:var(--surface);text-align:center;border-top:1px solid var(--border);">
+    <div class="rev" style="max-width:680px;margin:0 auto;">
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.3);border-radius:99px;margin-bottom:28px;">
+        <span style="font-size:.78rem;font-weight:700;color:#93c5fd;letter-spacing:.08em;text-transform:uppercase;" data-i18n="cta_badge">Jetzt loslegen</span>
+      </div>
+      <h2 style="font-size:clamp(2rem,4vw,3.5rem);font-weight:900;letter-spacing:-0.04em;margin:0 0 18px;" data-i18n="cta_title">Starte kostenlos durch.</h2>
+      <p style="font-size:1.1rem;color:var(--muted);margin:0 0 36px;" data-i18n="cta_desc">Verwalte dein Fahrzeug noch heute smarter &ndash; ohne Aufwand, ohne versteckte Kosten.</p>
+      <a class="btn btn-p" href="https://app.carman.io" target="_blank" rel="noopener" data-i18n="cta_btn">App kostenlos starten &rarr;</a>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer style="padding:40px 20px;text-align:center;">
+    <div style="max-width:1100px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px;">
+        <img src="app-icon-light.svg" alt="Carman" width="24" height="24">
+        <span style="font-weight:900;font-size:1.1rem;color:#60a5fa;">carman</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px 28px;margin-bottom:28px;">
+        <a class="btn btn-p btn-sm" href="https://app.carman.io" target="_blank" rel="noopener" data-i18n="ft_app">App &ouml;ffnen</a>
+        <a class="flink" href="impressum.html" data-i18n="ft_imp">Impressum</a>
+        <a class="flink" href="agb.html" data-i18n="ft_agb">AGB</a>
+        <a class="flink" href="datenschutz.html" data-i18n="ft_prv">Datenschutz</a>
+      </div>
+      <p style="font-size:.82rem;color:var(--faint);margin:0;">&copy; 2025 WAMOCON GmbH &middot; carman_lp_v3</p>
+    </div>
+  </footer>
+
+  <!-- ═══ SCRIPT ═══ -->
+  <script>
+    var T = {
+      de: {
+        nav_features:"Features", nav_how:"So funktioniert\u2019s", nav_faq:"FAQ", nav_app:"Zur App",
+        hero_badge:"Smarter Fahrzeugmanager", hero_t1:"Dein Auto.", hero_t2:"Perfekt im Griff.",
+        hero_desc:"Carman hilft dir, Wartungen, Kraftstoff, Kosten und Erinnerungen f\u00fcr all deine Fahrzeuge einfach und \u00fcbersichtlich zu verwalten.",
+        hero_cta1:"App starten \u2192", hero_cta2:"Mehr erfahren",
+        hero_note:"Kostenlos starten \u00b7 Keine Registrierung erforderlich",
+        feat_title:"Alles was dein Auto braucht",
+        feat_sub:"Vollst\u00e4ndige \u00dcbersicht \u00fcber Wartung, Kosten und Verbrauch \u2013 alles an einem Ort.",
+        f1t:"Wartungsplanung", f1d:"\u00d6lwechsel, T\u00dcV, Reifenwechsel und alle weiteren Wartungsintervalle immer im Blick.",
+        f2t:"Tankbuch", f2d:"Protokolliere Tankf\u00fcllungen und analysiere deinen Kraftstoffverbrauch \u00fcber Zeit.",
+        f3t:"Kostentracking", f3d:"Alle Fahrzeugkosten \u2013 Reparaturen, Versicherung, Steuern \u2013 auf einen Blick erfassen.",
+        f4t:"Erinnerungen", f4d:"Automatische Erinnerungen f\u00fcr anstehende Wartungen \u2013 damit nichts verpasst wird.",
+        f5t:"Mehrere Fahrzeuge", f5d:"Autos, Motorr\u00e4der oder Nutzfahrzeuge \u2013 alles in einer einzigen App verwalten.",
+        f6t:"Auswertungen", f6d:"\u00dcbersichtliche Statistiken zu Kosten, Verbrauch und Fahrleistung.",
+        s1:"Aktive Nutzer", s2:"Verwaltete Fahrzeuge", s3:"Durchschnittsbewertung",
+        how_title:"In 3 Schritten startklar", how_sub:"Schnell einrichten und sofort loslegen.",
+        s1t:"Fahrzeug anlegen", s1d:"Marke, Modell und Baujahr hinzuf\u00fcgen \u2013 fertig in unter einer Minute.",
+        s2t:"Daten erfassen", s2d:"Tankf\u00fcllungen, Wartungen und Kosten schnell und unkompliziert eintragen.",
+        s3t:"\u00dcberblick behalten", s3d:"Dashboard, Statistiken und Erinnerungen zeigen alles Wichtige auf einen Blick.",
+        faq_title:"H\u00e4ufige Fragen",
+        fq1:"Ist Carman kostenlos?", fa1:"Ja, der Basiszugang ist kostenlos. Premium-Funktionen sind optional gegen eine geringe Geb\u00fchr verf\u00fcgbar.",
+        fq2:"Wo werden meine Daten gespeichert?", fa2:"Deine Daten werden sicher in der Cloud gespeichert und sind von \u00fcberall abrufbar. Datenschutz hat oberste Priorit\u00e4t.",
+        fq3:"Wie viele Fahrzeuge kann ich hinzuf\u00fcgen?", fa3:"Im kostenlosen Plan bis zu 2 Fahrzeuge. Mit einem Premium-Plan unbegrenzt viele Fahrzeuge m\u00f6glich.",
+        fq4:"Gibt es eine mobile App?", fa4:"Carman ist als Progressive Web App (PWA) verf\u00fcgbar und kann auf iOS und Android als App installiert werden.",
+        cta_badge:"Jetzt loslegen", cta_title:"Starte kostenlos durch.",
+        cta_desc:"Verwalte dein Fahrzeug noch heute smarter \u2013 ohne Aufwand, ohne versteckte Kosten.",
+        cta_btn:"App kostenlos starten \u2192",
+        ft_app:"App \u00f6ffnen", ft_imp:"Impressum", ft_agb:"AGB", ft_prv:"Datenschutz"
+      },
+      en: {
+        nav_features:"Features", nav_how:"How It Works", nav_faq:"FAQ", nav_app:"Open App",
+        hero_badge:"Smart Vehicle Manager", hero_t1:"Your Car.", hero_t2:"Perfectly Managed.",
+        hero_desc:"Carman helps you easily track maintenance, fuel, expenses and reminders for all your vehicles in one place.",
+        hero_cta1:"Launch App \u2192", hero_cta2:"Learn More",
+        hero_note:"Free to start \u00b7 No registration required",
+        feat_title:"Everything Your Car Needs",
+        feat_sub:"Full overview of maintenance, costs and fuel \u2013 all in one place.",
+        f1t:"Maintenance Planning", f1d:"Keep track of oil changes, inspections, tyre rotations and all other maintenance intervals.",
+        f2t:"Fuel Log", f2d:"Record every fill-up and analyse your fuel consumption over time.",
+        f3t:"Cost Tracking", f3d:"Log all vehicle costs \u2013 repairs, insurance, taxes \u2013 and stay on budget.",
+        f4t:"Reminders", f4d:"Never miss a service again. Automatic reminders for upcoming maintenance dates.",
+        f5t:"Multiple Vehicles", f5d:"Cars, motorcycles or vans \u2013 manage everything in a single app.",
+        f6t:"Reports & Analytics", f6d:"Clear statistics and reports on costs, fuel consumption and mileage.",
+        s1:"Active Users", s2:"Managed Vehicles", s3:"Average Rating",
+        how_title:"Ready in 3 Steps", how_sub:"Set up quickly and get started right away.",
+        s1t:"Add Your Vehicle", s1d:"Add make, model and year \u2013 done in under a minute.",
+        s2t:"Log Your Data", s2d:"Enter fuel stops, maintenance records and costs \u2013 quick and easy.",
+        s3t:"Stay in Control", s3d:"Dashboard, statistics and reminders show you everything important at a glance.",
+        faq_title:"Frequently Asked Questions",
+        fq1:"Is Carman free?", fa1:"Yes, the basic plan is free. Premium features are optionally available for a small fee.",
+        fq2:"Where is my data stored?", fa2:"Your data is securely stored in the cloud and accessible from anywhere. We take privacy seriously.",
+        fq3:"How many vehicles can I add?", fa3:"The free plan supports up to 2 vehicles. With a premium plan, you can manage unlimited vehicles.",
+        fq4:"Is there a mobile app?", fa4:"Carman is available as a Progressive Web App (PWA) and can be installed on iOS and Android.",
+        cta_badge:"Get Started", cta_title:"Start for Free Today.",
+        cta_desc:"Manage your vehicle smarter today \u2013 no hassle, no hidden costs.",
+        cta_btn:"Start App for Free \u2192",
+        ft_app:"Open App", ft_imp:"Imprint", ft_agb:"Terms & Conditions", ft_prv:"Privacy Policy"
+      }
+    };
+
+    function setLang(lang) {
+      var t = T[lang];
+      document.documentElement.lang = lang;
+      document.getElementById('page-title').textContent =
+        lang === 'en' ? 'Carman \u2013 Your Smart Vehicle Manager' : 'Carman \u2013 Dein smarter Fahrzeugmanager';
+      var d = document.getElementById('page-desc');
+      if (d) d.content = lang === 'en'
+        ? 'Carman helps you easily manage maintenance, costs and fuel logs for your vehicle.'
+        : 'Carman hilft dir, Wartungen, Kosten und Tankf\u00fcllungen f\u00fcr dein Fahrzeug einfach zu verwalten.';
+      document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var k = el.getAttribute('data-i18n');
+        if (t[k] !== undefined) el.textContent = t[k];
+      });
+      ['ld','le','ldm','lem'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.className = (id === 'ld' || id === 'ldm') ? (lang === 'de' ? 'on' : '') : (lang === 'en' ? 'on' : '');
+      });
+      try { localStorage.setItem('carman_lang', lang); } catch(e) {}
+    }
+
+    document.getElementById('burgerBtn').addEventListener('click', function() {
+      document.getElementById('mm').classList.add('on');
+    });
+    function closeMM() { document.getElementById('mm').classList.remove('on'); }
+
+    window.addEventListener('scroll', function() {
+      document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    (function() {
+      var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+          if (e.isIntersecting) e.target.classList.add('in');
+          else if (e.boundingClientRect.top > 0) e.target.classList.remove('in');
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.rev').forEach(function(el) { obs.observe(el); });
+    })();
+
+    (function() {
+      try {
+        var s = localStorage.getItem('carman_lang');
+        if (s === 'en' || s === 'de') { setLang(s); return; }
+      } catch(e) {}
+      setLang((navigator.language || 'de').toLowerCase().startsWith('de') ? 'de' : 'en');
+    })();
+  </script>
+</body>
+</html>
+
+
